@@ -8,7 +8,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"log"
 
-	_ "effectiveMobileTT/cmd/effectiveMobileTT/docs"
+	_ "effectiveMobileTT/docs"
 	"effectiveMobileTT/internal/api"
 	"effectiveMobileTT/internal/repository"
 )
@@ -26,7 +26,6 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 // @description API для управления песнями, включая добавление, обновление, удаление и получение списка песен.
 // @host localhost:8000
 // @BasePath /
-
 func main() {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}

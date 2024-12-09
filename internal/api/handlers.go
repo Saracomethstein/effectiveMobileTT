@@ -1,7 +1,7 @@
 package api
 
 import (
-	_ "effectiveMobileTT/cmd/effectiveMobileTT/docs"
+	_ "effectiveMobileTT/docs"
 	"effectiveMobileTT/internal/models"
 	"effectiveMobileTT/internal/repository"
 	"encoding/json"
@@ -30,7 +30,7 @@ type SongHandler struct {
 // @Param limit query int false "Количество записей (по умолчанию 10)"
 // @Param offset query int false "Смещение (по умолчанию 0)"
 // @Success 200 {array} models.Song
-// @Failure 500 {object} echo.Map "Ошибка сервера"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router /songs [get]
 func (h *SongHandler) GetSongs(c echo.Context) error {
 	group := c.QueryParam("group")
@@ -75,7 +75,7 @@ func (h *SongHandler) GetSongs(c echo.Context) error {
 // @Param limit query int false "Количество куплетов (по умолчанию 5)"
 // @Param offset query int false "Смещение (по умолчанию 0)"
 // @Success 200 {array} string "Список куплетов"
-// @Failure 404 {object} echo.Map "Песня не найдена"
+// @Failure 404 {object} map[string]interface{} "Песня не найдена"
 // @Router /songs/{id}/text [get]
 func (h *SongHandler) GetSongText(c echo.Context) error {
 	id := c.Param("id")
@@ -126,8 +126,8 @@ func (h *SongHandler) GetSongText(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID песни"
 // @Success 204 "Песня удалена"
-// @Failure 404 {object} echo.Map "Песня не найдена"
-// @Failure 500 {object} echo.Map "Ошибка сервера"
+// @Failure 404 {object} map[string]interface{} "Песня не найдена"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router /songs/{id} [delete]
 func (h *SongHandler) DeleteSong(c echo.Context) error {
 	id := c.Param("id")
@@ -156,9 +156,9 @@ func (h *SongHandler) DeleteSong(c echo.Context) error {
 // @Param id path string true "ID песни"
 // @Param body body models.UpdateSongRequest true "Данные для обновления"
 // @Success 200 {object} models.Song "Обновлённая песня"
-// @Failure 400 {object} echo.Map "Неверный запрос"
-// @Failure 404 {object} echo.Map "Песня не найдена"
-// @Failure 500 {object} echo.Map "Ошибка сервера"
+// @Failure 400 {object} map[string]interface{} "Неверный запрос"
+// @Failure 404 {object} map[string]interface{} "Песня не найдена"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router /songs/{id} [put]
 func (h *SongHandler) UpdateSong(c echo.Context) error {
 	id := c.Param("id")
@@ -193,8 +193,8 @@ func (h *SongHandler) UpdateSong(c echo.Context) error {
 // @Produce json
 // @Param body body models.AddSongRequest true "Данные для добавления песни"
 // @Success 201 {object} models.Song "Созданная песня"
-// @Failure 400 {object} echo.Map "Неверный запрос или ошибка валидации"
-// @Failure 500 {object} echo.Map "Ошибка сервера или внешнего API"
+// @Failure 400 {object} map[string]interface{} "Неверный запрос или ошибка валидации"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера или внешнего API"
 // @Router /songs [post]
 func (h *SongHandler) AddSong(c echo.Context) error {
 	var req models.AddSongRequest

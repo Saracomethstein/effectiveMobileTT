@@ -1,12 +1,16 @@
 BINARY_NAME=build/main
 
-.PHONY: all build run clean docker-build docker-run docker-clean
+.PHONY: all build run clean docker-build docker-run docker-clean swag
 
 all: run
 
 deps:
 	@echo "==> Installing dependencies..."
 	go mod tidy
+
+swag:
+	@swag init -g cmd/effectiveMobileTT/main.go
+
 
 build: deps
 	@echo "==> Building the application..."
