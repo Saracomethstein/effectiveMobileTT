@@ -5,8 +5,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"log"
 
+	_ "effectiveMobileTT/cmd/effectiveMobileTT/docs"
 	"effectiveMobileTT/internal/api"
 	"effectiveMobileTT/internal/repository"
 )
@@ -19,6 +21,12 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 }
 
+// @title Songs API
+// @version 1.0
+// @description API для управления песнями, включая добавление, обновление, удаление и получение списка песен.
+// @host localhost:8000
+// @BasePath /
+
 func main() {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
@@ -29,9 +37,16 @@ func main() {
 	db := repository.SetupDB()
 	defer db.Close()
 
-	api.InitRoutes(e, db)
+	repo := repository.SongRepository{DB: db}
+	handler := api.SongHandler{Repo: repo}
 
-	// Запуск сервера
+	e.GET("/songs", handler.GetSongs)
+	e.GET("/songs/:id/text", handler.GetSongText)
+	e.DELETE("/songs/:id", handler.DeleteSong)
+	e.PUT("/songs/:id", handler.UpdateSong)
+	e.POST("/songs", handler.AddSong)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	log.Println("Server is running on port 8000")
 	log.Fatal(e.Start(":8000"))
 }

@@ -1,12 +1,14 @@
 package api
 
 import (
+	_ "effectiveMobileTT/cmd/effectiveMobileTT/docs"
 	"effectiveMobileTT/internal/models"
 	"effectiveMobileTT/internal/repository"
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -16,6 +18,20 @@ type SongHandler struct {
 	Repo repository.SongRepository
 }
 
+// GetSongs получает список песен с фильтрацией и пагинацией.
+// @Summary Get songs
+// @Description Получение списка песен с фильтрацией по группе, названию и дате релиза.
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param group query string false "Название группы"
+// @Param song query string false "Название песни"
+// @Param releaseDate query string false "Дата релиза (в формате YYYY-MM-DD)"
+// @Param limit query int false "Количество записей (по умолчанию 10)"
+// @Param offset query int false "Смещение (по умолчанию 0)"
+// @Success 200 {array} models.Song
+// @Failure 500 {object} echo.Map "Ошибка сервера"
+// @Router /songs [get]
 func (h *SongHandler) GetSongs(c echo.Context) error {
 	group := c.QueryParam("group")
 	song := c.QueryParam("song")
@@ -40,6 +56,7 @@ func (h *SongHandler) GetSongs(c echo.Context) error {
 
 	songs, err := h.Repo.GetSongs(group, song, releaseDate, limit, offset)
 	if err != nil {
+		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": "Failed to fetch songs",
 		})
@@ -48,6 +65,18 @@ func (h *SongHandler) GetSongs(c echo.Context) error {
 	return c.JSON(http.StatusOK, songs)
 }
 
+// GetSongText получает текст песни с пагинацией по куплетам.
+// @Summary Get song text
+// @Description Получение текста песни по ID с возможностью пагинации по куплетам.
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param id path string true "ID песни"
+// @Param limit query int false "Количество куплетов (по умолчанию 5)"
+// @Param offset query int false "Смещение (по умолчанию 0)"
+// @Success 200 {array} string "Список куплетов"
+// @Failure 404 {object} echo.Map "Песня не найдена"
+// @Router /songs/{id}/text [get]
 func (h *SongHandler) GetSongText(c echo.Context) error {
 	id := c.Param("id")
 	limitStr := c.QueryParam("limit")
@@ -89,6 +118,17 @@ func (h *SongHandler) GetSongText(c echo.Context) error {
 	return c.JSON(http.StatusOK, paginatedVerses)
 }
 
+// DeleteSong удаляет песню по ID.
+// @Summary Delete a song
+// @Description Удаление песни по её ID.
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param id path string true "ID песни"
+// @Success 204 "Песня удалена"
+// @Failure 404 {object} echo.Map "Песня не найдена"
+// @Failure 500 {object} echo.Map "Ошибка сервера"
+// @Router /songs/{id} [delete]
 func (h *SongHandler) DeleteSong(c echo.Context) error {
 	id := c.Param("id")
 
@@ -107,6 +147,19 @@ func (h *SongHandler) DeleteSong(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+// UpdateSong обновляет информацию о песне по ID.
+// @Summary Update a song
+// @Description Обновление информации о песне по её ID.
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param id path string true "ID песни"
+// @Param body body models.UpdateSongRequest true "Данные для обновления"
+// @Success 200 {object} models.Song "Обновлённая песня"
+// @Failure 400 {object} echo.Map "Неверный запрос"
+// @Failure 404 {object} echo.Map "Песня не найдена"
+// @Failure 500 {object} echo.Map "Ошибка сервера"
+// @Router /songs/{id} [put]
 func (h *SongHandler) UpdateSong(c echo.Context) error {
 	id := c.Param("id")
 
@@ -132,6 +185,17 @@ func (h *SongHandler) UpdateSong(c echo.Context) error {
 	return c.JSON(http.StatusOK, updatedSong)
 }
 
+// AddSong добавляет новую песню в базу данных.
+// @Summary Add a song
+// @Description Добавление новой песни с получением данных из внешнего API.
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param body body models.AddSongRequest true "Данные для добавления песни"
+// @Success 201 {object} models.Song "Созданная песня"
+// @Failure 400 {object} echo.Map "Неверный запрос или ошибка валидации"
+// @Failure 500 {object} echo.Map "Ошибка сервера или внешнего API"
+// @Router /songs [post]
 func (h *SongHandler) AddSong(c echo.Context) error {
 	var req models.AddSongRequest
 	if err := c.Bind(&req); err != nil {
@@ -175,6 +239,6 @@ func (h *SongHandler) AddSong(c echo.Context) error {
 			"error": "Failed to save song to database",
 		})
 	}
-	
+
 	return c.JSON(http.StatusCreated, newSong)
 }
